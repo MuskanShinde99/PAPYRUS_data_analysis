@@ -6,14 +6,15 @@ Created on Tue Sep 30 12:21:37 2025
 @author: muskanshinde
 """
 
-from scipy.ndimage import center_of_mass
-from matplotlib.patches import Circle
-from scipy.ndimage import fourier_shift
-from scipy.optimize import curve_fit
 import os
-from scipy.io import loadmat
+
 import matplotlib.pyplot as plt
+import numpy as np
 from astropy.io import fits
+from matplotlib.patches import Circle
+from scipy.io import loadmat
+from scipy.ndimage import center_of_mass, fourier_shift
+from scipy.optimize import curve_fit
 
 def structured_bkg(img):
     """Compute a synthetic structured background"""
@@ -123,8 +124,6 @@ def encircled_energy(psf, x_c, y_c, radius=20):
     mask = r <= radius
     return psf[mask].sum()
 
-import numpy as np
-
 def encircled_energy_in_3x3(psf, x_c, y_c, half_size=1):
     """
     Compute flux inside a (2*half_size+1) × (2*half_size+1) square 
@@ -153,53 +152,6 @@ def encircled_energy_in_3x3(psf, x_c, y_c, half_size=1):
     x1 = min(psf.shape[1], x_c + half_size + 1)
 
     return psf[y0:y1, x0:x1].sum()
-
-
-# def gaussian2d(xy, amp, x0, y0, sigma_x, sigma_y, offset):
-#     """2D axis-aligned Gaussian."""
-#     x, y = xy
-#     g = amp * np.exp(
-#         -(((x - x0) ** 2) / (2 * sigma_x ** 2) +
-#           ((y - y0) ** 2) / (2 * sigma_y ** 2))
-#     ) + offset
-#     return g.ravel()
-
-# def fit_fwhm_2d(psf, pixel_scale=None):
-#     """
-#     Fit a 2D Gaussian to a PSF image and return FWHM values + model.
-#     """
-#     ny, nx = psf.shape
-#     x = np.arange(nx)
-#     y = np.arange(ny)
-#     X, Y = np.meshgrid(x, y)
-
-#     # Initial guess
-#     amp0 = psf.max()
-#     y0, x0 = np.unravel_index(np.argmax(psf), psf.shape)
-#     #x0, y0 = nx // 2, ny // 2
-#     sigma0 = min(nx, ny) / 10
-#     offset0 = np.median(psf)
-#     p0 = [amp0, x0, y0, sigma0, sigma0, offset0]
-
-#     # Fit
-#     popt, _ = curve_fit(gaussian2d, (X, Y), psf.ravel(), p0=p0)
-#     amp, x0, y0, sigma_x, sigma_y, offset = popt
-
-#     # FWHM
-#     fwhm_x = 2.355 * sigma_x
-#     fwhm_y = 2.355 * sigma_y
-#     fwhm_geom = np.sqrt(fwhm_x * fwhm_y)
-
-#     if pixel_scale is not None:
-#         fwhm_x *= pixel_scale
-#         fwhm_y *= pixel_scale
-#         fwhm_geom *= pixel_scale
-
-#     # Generate best-fit model image
-#     model = gaussian2d((X, Y), *popt).reshape(psf.shape)
-
-#     return (fwhm_x, fwhm_y, fwhm_geom), popt, model
-
 
 def gaussian2d(xy, amp, x0, y0, sigma_x, sigma_y, offset):
     """2D axis-aligned Gaussian."""
